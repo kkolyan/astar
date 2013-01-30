@@ -1,0 +1,180 @@
+<html>
+	<head>
+		<script type="text/javascript" src="Finder.js"></script>
+		<script type="text/javascript" src="NodeManager.js"></script>
+		<script type="text/javascript" src="Point.js"></script>
+		<script type="text/javascript" src="SimpleArea.js"></script>
+		<script type="text/javascript" src="SortedList.js"></script>
+		<script type="text/javascript">
+			var width;
+			var height;
+			var editorMode = "obstacle";
+
+			var sourceCell;
+
+			//===============================================================================================
+			
+			function reconstructTable() {
+				width = document.form.width.value;
+				height = document.form.height.value;
+				var cellSize = document.form.cellSize.value;
+				
+				var table = document.getElementById("field");
+				table.innerHTML = "";
+				for (var y = 0; y < height; y ++) {
+					var tr = document.createElement("tr");
+					for (var x = 0; x < width; x ++) {
+						var td = document.createElement("td");
+						td.id = new Point(x, y).toIdString();
+						td.width = cellSize;
+						td.height = cellSize;
+						td.className = "empty";
+						td.onclick = function() {
+							if (editorMode == "source") {
+								if (sourceCell) sourceCell.className = "empty";
+								sourceCell = this;
+							}
+							if (this.className != editorMode) {
+								this.className = editorMode;
+							} else {
+								this.className = "empty";
+							}
+							this.title = this.className;
+						};
+						tr.appendChild(td);
+					}
+					table.appendChild(tr);
+				}
+			}
+
+			//===============================================================================================
+
+			function findPath() {
+				var obstacles = {};
+				var source;
+				var destinations = [];
+
+				for (var y = 0; y < height; y ++) {
+					for (var x = 0; x < width; x ++) {
+						var point = new Point(x, y);
+						var td = document.getElementById(point.toIdString());
+						if (td.className == "obstacle") 	obstacles[point.toIdString()] = true;
+						if (td.className == "source") 		source = point;
+						if (td.className == "destination") 	destinations.push(point);
+						if (td.className == "step")		td.className = "empty";
+						td.innerHTML = "";
+					}
+				}
+
+				var finder = new Finder({
+					area: new SimpleArea(width, height,obstacles),
+					source: source,
+					destinations: destinations
+				});
+
+//				try {
+					finder.doSearch();
+//				} catch(e) {
+//					alert(e.message);
+//					throw e;
+//				}
+
+				if (finder.path) {
+					for (var point1 in finder.getNodeManager().getNodeMap()) {
+						var td1 = document.getElementById(point1);
+						point1 = finder.getNodeManager().getNodeMap()[point1].node.point;
+						if (document.form.showCosts.value) {
+							td1.innerHTML += point1.costG + "+" + point1.costH;
+						}
+						if (document.form.showSequence.value) {
+							td1.innerHTML += "<br/>" + point1.number;
+						}
+					}
+					for (var i in finder.path) {
+						var point0 = finder.path[i];
+						var td0 = document.getElementById(point0.toIdString());
+						if (td0.className == "empty") td0.className = "step";
+					}
+				} else {
+					alert("Path not found");
+				}
+			}
+
+			//===============================================================================================
+
+			function setEditorMode(mode) {
+				editorMode = mode;
+			}
+
+			function init() {
+				reconstructTable();
+			}
+
+			//===============================================================================================
+		</script>
+		<style type="text/css">
+			td {
+				cursor: pointer;
+			}
+			#field td {
+				border: #CCC solid 1px;
+				font-size:8px;
+			}
+			table {
+				border-collapse:collapse;
+			}
+			.source {
+				background-color:blue;
+			}
+			.destination {
+				background-color:red;
+			}
+			.obstacle {
+				background-color:#404040;
+			}
+			.empty {
+				background-color:#adff2f;
+			}
+			.step {
+				background-color:green;
+			}
+		</style>
+	</head>
+	<body onload="init()">
+		<form name="form" action="" onsubmit="reconstructTable();return false;">
+			<label>
+				Width
+				<input name="width" value="20"/>
+			</label>
+			<label>
+				Height
+				<input name="height" value="20"/>
+			</label>
+			<label>
+				Cell Size
+				<input name="cellSize" value="24"/>
+			</label>
+			<label>
+				Show Sequence
+				<input name="showSequence" type="checkbox"/>
+			</label>
+			<label>
+				Show Costs
+				<input name="showCosts" type="checkbox"/>
+			</label>
+			<input type="submit" value="Create Field"/>
+		</form>
+		<table>
+			<tr>
+				<td width="150" height="50" onclick="setEditorMode(this.className)" class="source">Source</td>
+				<td width="150" height="50" onclick="setEditorMode(this.className)" class="destination">Destination</td>
+				<td width="150" height="50" onclick="setEditorMode(this.className)" class="empty">Empty</td>
+				<td width="150" height="50" onclick="setEditorMode(this.className)" class="obstacle">Obstacle</td>
+			</tr>
+		</table>
+		<br/>
+		<a href="javascript:findPath()">Find Path</a>
+		<table id="field">
+		</table>
+	</body>
+</html>
