@@ -3,7 +3,9 @@ package net.kkolyan.astar.demo;
 import net.kkolyan.astar.Finder;
 
 import java.lang.String;import java.lang.System;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -19,29 +21,78 @@ public class SimpleTestTool {
 				"       A    X    X      \n" +
 				"            X           "
 		);
-		printPath(
-				"A           X           \n" +
-				"            X      Z    \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"            X           \n" +
-				"                        "
-		);
+        printPath(
+                "" +
+                        "A           X           \n" +
+                        "            X      Z    \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "                        "
+        );
+        printPath(
+                "" +
+                        "A           X           \n" +
+                        "            X      Z    \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X       Z   \n" +
+                        "                        "
+        );
+        printPath(
+                "" +
+                        "A           X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X    Z      \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "                        \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X           \n" +
+                        "            X       Z   \n" +
+                        "            X           "
+        );
 	}
 	
 	public static void printPath(String fieldString) {
@@ -50,7 +101,7 @@ public class SimpleTestTool {
 		int width = -1;
 		Set<Point> obstacles = new HashSet<Point>();
 		Point source = null;
-		Point destination = null;
+        Collection<Point> destinations = new ArrayList<Point>();
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();
 			if (line.length() > width) {
@@ -66,7 +117,7 @@ public class SimpleTestTool {
 					source = point;
 				}
 				if (c == 'Z') {
-					destination = point;
+                    destinations.add(point);
 				}
 			}
 			height ++;
@@ -74,7 +125,7 @@ public class SimpleTestTool {
 		SimpleArea area = new SimpleArea(width, height, obstacles);
 		Finder<Point> finder = new Finder<Point>();
 		finder.setSourcePoint(source);
-		finder.setDestinationPoints(Arrays.asList(destination));
+		finder.setDestinationPoints(destinations);
 		finder.setField(area);
 
 		finder.doSearch();
@@ -99,7 +150,7 @@ public class SimpleTestTool {
 				if (point.equals(source)) {
 					c = 'A';
 				}
-				if (point.equals(destination)) {
+				if (destinations.contains(point)) {
 					c = 'Z';
 				}
 				System.out.print(c);
